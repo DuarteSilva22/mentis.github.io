@@ -8,18 +8,91 @@
 </head>
 <body>
     <header>
-        <h1>Bem-vindo à App Saúde Mental</h1>
+        <h1>App Saúde Mental</h1>
+        <nav>
+            <button onclick="navigateTo('home')">Início</button>
+            <button onclick="navigateTo('questionario')">Questionário Diário</button>
+            <button onclick="navigateTo('graficos')">Gráficos</button>
+            <button onclick="navigateTo('feedback')">Feedback</button>
+            <button onclick="navigateTo('diario')">Diário Emocional</button>
+            <button onclick="navigateTo('metas')">Metas</button>
+            <button onclick="navigateTo('ajuda')">Ajuda Profissional</button>
+        </nav>
     </header>
-    <main>
-        <section id="menu">
-            <button onclick="navigateTo('questionario')">Preencher Questionário Diário</button>
-            <button onclick="navigateTo('metas')">Definir Metas</button>
-            <button onclick="navigateTo('ajuda')">Procurar Ajuda Profissional</button>
-        </section>
-        <section id="content">
-            <!-- Conteúdo será dinâmico -->
-        </section>
+    <main id="content">
+        <!-- Conteúdo dinâmico será carregado aqui -->
     </main>
-    <script src="script.js"></script>
+
+    <script>
+        const pages = {
+            home: `<h2>Bem-vindo!</h2><p>Escolha uma opção do menu para começar.</p>`,
+            questionario: `
+                <h2>Questionário Diário</h2>
+                <form>
+                    <label>Como se sente hoje?</label><br>
+                    <textarea placeholder="Escreva aqui..." required></textarea><br><br>
+                    <label>Nível de Stress (1-10):</label><br>
+                    <input type="number" min="1" max="10" required><br><br>
+                    <label>Atividades Físicas:</label><br>
+                    <textarea placeholder="Descreva aqui..." required></textarea><br><br>
+                    <button type="submit">Submeter</button>
+                </form>`,
+            graficos: `<h2>Gráficos de Tendências Emocionais</h2><canvas id="grafico" width="400" height="200"></canvas>`,
+            feedback: `<h2>Feedback e Sugestões Personalizadas</h2><p>Aqui estão algumas sugestões baseadas nos seus dados.</p>`,
+            diario: `
+                <h2>Diário Emocional</h2>
+                <textarea placeholder="Escreva sobre os seus sentimentos hoje..."></textarea><br><br>
+                <button>Guardar</button>`,
+            metas: `<h2>Definir Metas de Bem-Estar</h2><p>Escolha as suas metas para melhorar o bem-estar.</p>`,
+            ajuda: `<h2>Ajuda Profissional</h2><p>Recursos disponíveis para apoio especializado.</p>`
+        };
+
+        function navigateTo(page) {
+            document.getElementById('content').innerHTML = pages[page] || '<h2>Página não encontrada</h2>';
+            if (page === 'graficos') renderChart();
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('grafico').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'],
+                    datasets: [
+                        {
+                            label: 'Nível de Humor',
+                            data: [5, 4, 3, 2, 2, 1, 1],
+                            borderColor: 'blue',
+                            fill: false
+                        },
+                        {
+                            label: 'Nível de Energia',
+                            data: [6, 5, 4, 3, 2, 2, 1],
+                            borderColor: 'green',
+                            fill: false
+                        },
+                        {
+                            label: 'Nível de Stress',
+                            data: [3, 4, 5, 6, 6, 7, 8],
+                            borderColor: 'red',
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Carregar a página inicial ao abrir
+        navigateTo('home');
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>
