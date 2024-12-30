@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Protótipo App Saúde Mental</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Inclusão da biblioteca do Chart.js -->
 </head>
 <body>
     <header>
@@ -17,68 +21,108 @@
             <button onclick="navigateTo('diario')">Diário Emocional</button>
             <button onclick="navigateTo('metas')">Metas</button>
             <button onclick="navigateTo('ajuda')">Ajuda Profissional</button>
+            <a href="registo.html" class="menu-button">Registo</a>
+            <a href="login.html" class="menu-button">Login</a>
         </nav>
+        <div id="user-info" style="position: absolute; top: 10px; right: 10px;"></div>
     </header>
-    <main id="content">
-        <!-- Conteúdo dinâmico será carregado aqui -->
-    </main>
+    <main id="content"></main>
 
     <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDdlqwKGV2ykybe1KQGnBDFhS0nFiEdQbM",
+            authDomain: "mentis-f566d.firebaseapp.com",
+            projectId: "mentis-f566d",
+            storageBucket: "mentis-f566d.firebasestorage.app",
+            messagingSenderId: "680052083516",
+            appId: "1:680052083516:web:30ac0adfa0b6dbad606c39"
+        };
+
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        let currentUser = null;
+
         const pages = {
             home: `<h2>Bem-vindo!</h2><p>Escolha uma opção do menu para começar.</p>`,
-            questionario: `
+            questionario: ` 
                 <h2>Questionário Diário</h2>
-                <form>
-                    <label>Como se sente hoje?</label><br>
-                    <textarea placeholder="Escreva aqui..." required></textarea><br><br>
-                    <label>Nível de Stress (1-10):</label><br>
-                    <input type="number" min="1" max="10" required><br><br>
-                    <label>Atividades Físicas:</label><br>
-                    <textarea placeholder="Descreva aqui..." required></textarea><br><br>
+                <form id="daily-questionnaire">
+                    <label>Como se sente hoje? (Escolha apenas uma):</label><br>
+                    <input type="radio" name="feeling" value="Feliz"> Feliz<br>
+                    <input type="radio" name="feeling" value="Triste"> Triste<br>
+                    <input type="radio" name="feeling" value="Ansioso"> Ansioso<br>
+                    <input type="radio" name="feeling" value="Calmo"> Calmo<br>
+                    <input type="radio" name="feeling" value="Cansado"> Cansado<br><br>
+
+                    <label>Nível de Stress (Escolha apenas um):</label><br>
+                    <input type="radio" name="stress" value="Baixo (1-3)"> Baixo (1-3)<br>
+                    <input type="radio" name="stress" value="Moderado (4-6)"> Moderado (4-6)<br>
+                    <input type="radio" name="stress" value="Alto (7-10)"> Alto (7-10)<br><br>
+
+                    <label>Atividades Físicas (Escolha todas que se aplicam):</label><br>
+                    <input type="checkbox" name="activities" value="Caminhada"> Caminhada<br>
+                    <input type="checkbox" name="activities" value="Corrida"> Corrida<br>
+                    <input type="checkbox" name="activities" value="Yoga"> Yoga<br>
+                    <input type="checkbox" name="activities" value="Treino de Força"> Treino de Força<br>
+                    <input type="checkbox" name="activities" value="Nenhuma"> Nenhuma<br><br>
+
                     <button type="submit">Submeter</button>
-                </form>`,
-            graficos: `<h2>Gráficos de Tendências Emocionais</h2><canvas id="grafico" width="400" height="200"></canvas>`,
-            feedback: `<h2>Feedback e Sugestões Personalizadas</h2><p>Aqui estão algumas sugestões baseadas nos seus dados.</p>`,
+                </form>
+                <div id="feedback"></div>`,
+            feedback: `<h2>Feedback e Sugestões Personalizadas</h2><div id="personal-feedback"></div>`,
             diario: `
                 <h2>Diário Emocional</h2>
                 <textarea placeholder="Escreva sobre os seus sentimentos hoje..."></textarea><br><br>
                 <button>Guardar</button>`,
-            metas: `<h2>Definir Metas de Bem-Estar</h2><p>Escolha as suas metas para melhorar o bem-estar.</p>`,
-            ajuda: `<h2>Ajuda Profissional</h2><p>Recursos disponíveis para apoio especializado.</p>`
+            metas: `<h2>Definir Metas de Bem-Estar</h2>
+<p>Escolha suas metas para melhorar o bem-estar.</p>
+<form id="goals-form">
+    <div>
+        <label for="mental-health-goal">Meta para saúde mental:</label>
+        <input type="text" id="mental-health-goal" placeholder="Exemplo: Meditar 10 minutos por dia" required>
+    </div>
+    <div>
+        <label for="physical-activity-goal">Meta para atividade física:</label>
+        <input type="text" id="physical-activity-goal" placeholder="Exemplo: Caminhar 30 minutos todos os dias" required>
+    </div>
+    <div>
+        <label for="social-goal">Meta social:</label>
+        <input type="text" id="social-goal" placeholder="Exemplo: Enviar mensagem a um amigo uma vez por semana" required>
+    </div>
+    <button type="submit">Salvar Metas</button>
+</form>
+<div id="user-goals"></div>`,
+            ajuda: `<h2>Ajuda Profissional</h2><p>Recursos disponíveis para apoio especializado.</p>`,
+            graficos: `
+                <h2>Gráficos de Bem-Estar</h2>
+                <canvas id="grafico" width="400" height="200"></canvas>
+            `
         };
 
         function navigateTo(page) {
             document.getElementById('content').innerHTML = pages[page] || '<h2>Página não encontrada</h2>';
+            if (page === 'questionario') setupQuestionnaire();
+            if (page === 'feedback') loadFeedback();
             if (page === 'graficos') renderChart();
         }
 
         function renderChart() {
+            const chartData = {
+                labels: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'],
+                datasets: [{
+                    label: 'Nível de Stress',
+                    data: [3, 4, 5, 6, 3, 4, 5], // Dados de exemplo
+                    borderColor: 'red',
+                    fill: false
+                }]
+            };
+
             const ctx = document.getElementById('grafico').getContext('2d');
             new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'],
-                    datasets: [
-                        {
-                            label: 'Nível de Humor',
-                            data: [5, 4, 3, 2, 2, 1, 1],
-                            borderColor: 'blue',
-                            fill: false
-                        },
-                        {
-                            label: 'Nível de Energia',
-                            data: [6, 5, 4, 3, 2, 2, 1],
-                            borderColor: 'green',
-                            fill: false
-                        },
-                        {
-                            label: 'Nível de Stress',
-                            data: [3, 4, 5, 6, 6, 7, 8],
-                            borderColor: 'red',
-                            fill: false
-                        }
-                    ]
-                },
+                data: chartData,
                 options: {
                     responsive: true,
                     plugins: {
@@ -90,9 +134,92 @@
             });
         }
 
-        // Carregar a página inicial ao abrir
+        
+
+        function setupQuestionnaire() {
+            const form = document.getElementById('daily-questionnaire');
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                const feeling = document.querySelector('input[name="feeling"]:checked')?.value;
+                const stressLevel = document.querySelector('input[name="stress"]:checked')?.value;
+                const activities = Array.from(document.querySelectorAll('input[name="activities"]:checked')).map(el => el.value);
+
+                if (!feeling || !stressLevel) {
+                    alert('Por favor, preencha todos os campos obrigatórios.');
+                    return;
+                }
+
+                let feedback = `<h3>Feedback do Dia</h3>`;
+
+                if (feeling === "Feliz") feedback += `<p>Que ótimo saber que está feliz! Continue cuidando de sua saúde mental.</p>`;
+                if (feeling === "Triste") feedback += `<p>Parece que você está triste. Considere escrever no diário emocional para processar seus sentimentos.</p>`;
+                if (feeling === "Ansioso") feedback += `<p>A ansiedade pode ser difícil. Experimente praticar técnicas de respiração ou meditação.</p>`;
+                if (feeling === "Calmo") feedback += `<p>Manter a calma é excelente! Continue com as práticas que ajudam nisso.</p>`;
+                if (feeling === "Cansado") feedback += `<p>Você está cansado. Certifique-se de descansar bem e dormir o suficiente.</p>`;
+
+                if (stressLevel === "Baixo (1-3)") feedback += `<p>Seu nível de stress está baixo, ótimo! Continue assim.</p>`;
+                if (stressLevel === "Moderado (4-6)") feedback += `<p>Seu stress está moderado. Talvez seja uma boa ideia tirar um tempo para relaxar.</p>`;
+                if (stressLevel === "Alto (7-10)") feedback += `<p>Seu stress está alto. Considere atividades como meditação ou exercícios para reduzir o stress.</p>`;
+
+                if (activities.includes("Nenhuma")) {
+                    feedback += `<p>Tente incluir alguma atividade física em sua rotina para melhorar o bem-estar.</p>`;
+                } else {
+                    feedback += `<p>Ótimo trabalho ao incluir atividades como ${activities.join(", ")}. Continue se movimentando!</p>`;
+                }
+
+                const user = firebase.auth().currentUser;
+                if (user) {
+                    try {
+                        await db.collection('feedback').add({
+                            uid: user.uid,
+                            email: user.email,
+                            feedback: feedback,
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+
+                        alert('Feedback salvo com sucesso!');
+                        navigateTo('feedback');
+                    } catch (error) {
+                        console.error('Erro ao salvar o feedback:', error);
+                        alert('Ocorreu um erro ao salvar o feedback. Tente novamente.');
+                    }
+                } else {
+                    alert('Você precisa estar logado para salvar o feedback.');
+                    navigateTo('login');
+                }
+            });
+        }
+
+        async function loadFeedback() {
+            const feedbackContainer = document.getElementById('personal-feedback');
+            feedbackContainer.innerHTML = 'Carregando...';
+
+            if (currentUser) {
+                const snapshot = await db.collection('feedback').where('uid', '==', currentUser.uid).orderBy('timestamp', 'desc').get();
+                if (snapshot.empty) {
+                    feedbackContainer.innerHTML = '<p>Nenhum feedback disponível.</p>';
+                } else {
+                    feedbackContainer.innerHTML = snapshot.docs.map(doc => doc.data().feedback).join('<hr>');
+                }
+            } else {
+                feedbackContainer.innerHTML = '<p>Faça login para visualizar seu feedback.</p>';
+            }
+        }
+
+        auth.onAuthStateChanged((user) => {
+            currentUser = user;
+            if (user) {
+                document.getElementById('user-info').innerHTML = `<span>Bem-vindo, ${user.email}!</span>`;
+            } else {
+                document.getElementById('user-info').innerHTML = `<a href="login.html">Login</a>`;
+            }
+        });
+
         navigateTo('home');
+
+
+        
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>

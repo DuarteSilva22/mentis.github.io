@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+    <script>
+        function goToHome() {
+            window.location.href = "index.html";
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+
+</head>
+<body>
+    <header>
+        <h1>Login</h1>
+        <button onclick="goToHome()">Home</button>
+
+    </header>
+    <main>
+        <form id="loginForm">
+            <input type="email" id="email" placeholder="Email" required />
+            <input type="password" id="password" placeholder="Palavra-passe" required />
+            <button type="submit">Entrar</button>
+        </form>
+    </main>
+
+    <script>
+        // Configuração do Firebase (substitua pelas suas credenciais do Firebase)
+        const firebaseConfig = {
+    apiKey: "AIzaSyDdlqwKGV2ykybe1KQGnBDFhS0nFiEdQbM",
+    authDomain: "mentis-f566d.firebaseapp.com",
+    projectId: "mentis-f566d",
+    storageBucket: "mentis-f566d.firebasestorage.app",
+    messagingSenderId: "680052083516",
+    appId: "1:680052083516:web:30ac0adfa0b6dbad606c39"
+      };
+
+        // Inicializar Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // Lógica de login
+        document.getElementById('loginForm').addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevenir envio do formulário
+
+            // Obter valores dos campos
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                // Realizar login com Firebase Authentication
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                // Exibir mensagem de sucesso
+                alert(`Bem-vindo, ${user.email}!`);
+                // Redirecionar ou carregar conteúdo protegido
+                window.location.href = "index.html"; // Substitua pelo destino correto
+            } catch (error) {
+                // Exibir mensagem de erro
+                alert("Erro ao fazer login: " + error.message);
+            }
+        });
+    </script>
+</body>
+</html>
