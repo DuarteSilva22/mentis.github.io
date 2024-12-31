@@ -1,12 +1,61 @@
 <head>
     <style>
-
-h2 {
-    font-size: 2rem;
-    color: #4CAF50;
-    margin-bottom: 1rem;
-    text-align: center;
-}
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        header {
+            background-color: #4CAF50;
+            padding: 20px;
+            color: white;
+            text-align: center;
+        }
+        nav {
+            margin: 1rem 0;
+            text-align: center;
+        }
+        nav button {
+            margin: 0 0.5rem;
+            padding: 0.5rem 1rem;
+            background-color: #4CAF50;
+            border: 1px solid #4CAF50;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        nav button:hover {
+            background-color: white;
+            color: #4CAF50;
+        }
+        .menu-button {
+            display: inline-block;
+            margin: 0 0.5rem;
+            padding: 0.5rem 1rem;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: 1px solid #4CAF50;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .menu-button:hover {
+            background-color: white;
+            color: #4CAF50;
+        }
+        #logout-button {
+            background-color: #ff4d4d;
+            color: white;
+            display: none;
+            transition: background-color 0.3s ease;
+        }
+        #logout-button:hover {
+            background-color: #e60000;
+        }
     </style>
 </head>
+
 <h2>Bem-vindo!</h2><p>Escolha uma opção do menu para começar.</p>
