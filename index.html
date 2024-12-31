@@ -9,6 +9,92 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Inclusão da biblioteca do Chart.js -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #333;
+        }
+        nav button, nav a {
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+        }
+        nav button:hover, nav a:hover {
+            background-color: #575757;
+        }
+        #logout-button {
+            color: white;
+            padding: 10px 20px;
+            background-color: red;
+            border: none;
+            cursor: pointer;
+        }
+        #logout-button:hover {
+            background-color: darkred;
+        }
+        nav a button {
+    margin: 0 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: #4CAF50;
+    border: 1px solid #4CAF50;
+    border-radius: 5px;
+    cursor: pointer;
+    color: white;
+    transition: background-color 0.3s, color 0.3s;
+    text-decoration: none;
+}
+nav a button:hover {
+    background-color: white;
+    color: #4CAF50;
+}
+nav.main-nav {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.nav-btn, .menu-button {
+    background-color: #f4f4f4;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    color: #333;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.nav-btn:hover, .menu-button:hover {
+    background-color: #45a049;
+    color: white;
+}
+nav.main-nav .menu-button {
+    display: inline-block;
+}
+
+nav.main-nav .menu-button#login-button,
+nav.main-nav .menu-button#register-button {
+    display: block;
+}
+    </style>
 </head>
 <body>
     <header>
